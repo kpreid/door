@@ -24,6 +24,18 @@
     var dz = vec[2];
     return function (x, y, z) { return obj(x - dx, y - dy, z - dz); }
   }
+  function spin(obj) {
+    return function (x, y, z) {
+      var a = Date.now() / 300;
+      var s = Math.sin(a);
+      var c = Math.cos(a);
+      return obj(
+        x * c + z * s,
+        y,
+        x * -s + z * c
+      );
+    };
+  }
   function vrotx(v, a) {
     return [
     v[0],
@@ -46,11 +58,10 @@
   function union(a, b) {
     return a.d > b.d ? b : a;
   }
-  var door = translate([0, 0, 10], box([1, 20, 10], [":", "\u2014", "|"]));
+  var door = translate([0, 10, 0], spin(translate([0, 0, 10], box([1, 20, 10], [":", "\u2014", "|"]))));
   var floor = translate([0, -10, 0], box([100, 1, 100], ["/","/","/"]));
   function scene(v) {
-    var doorv = vroty(vsub(v, [0, 10, 0]), Date.now() / 300);
-    return union(door(doorv[0], doorv[1], doorv[2]), floor(v[0],v[1],v[2]));
+    return union(door(v[0], v[1], v[2]), floor(v[0],v[1],v[2]));
   }
   var vw = 80, vh = 80;
   function view(v) {
