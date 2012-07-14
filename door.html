@@ -22,9 +22,12 @@
     var dz = vec[2];
     return function (x, y, z) { return obj(x - dx, y - dy, z - dz); };
   }
+  function mirror(obj) {
+    return function (x, y, z) { return obj(-x, y, z); };
+  }
   function spin(obj) {
     return function (x, y, z) {
-      a = Math.sin(pos) * Math.PI/2;
+      var a = pos;
       var s = Math.sin(a);
       var c = Math.cos(a);
       return obj(
@@ -42,6 +45,17 @@
         x,
         y * c + z * s,
         y * -s + z * c
+      );
+    };
+  }
+  function roty(a, obj) {
+    return function (x, y, z) {
+      var s = Math.sin(a);
+      var c = Math.cos(a);
+      return obj(
+        x * c + z * s,
+        y,
+        x * -s + z * c
       );
     };
   }
@@ -66,15 +80,16 @@
   var wallmat = [".", "\u2014", ":"];
   var dhwidth = 10;
   var dhheight = 20;
-  var door = translate([-dhwidth, 0, 0], spin(translate([1, 0, dhwidth], box([1, dhheight, dhwidth], [".", "\u2014", "|"]))));
+  var door = translate([-dhwidth*2, 0, 0], spin(translate([1, 0, dhwidth], box([1, dhheight, dhwidth], [".", "\u2014", "|"]))));
+  var doors = union(door, mirror(door));
   var wall = union(
     union(
-      translate([dhwidth+wallhwidth, 0, 1], box([wallhwidth, wallhheight, 1], wallmat)),
-      translate([-dhwidth-wallhwidth, 0, 1], box([wallhwidth, wallhheight, 1], wallmat))),
-    translate([0, wallhheight-(wallhheight-dhheight)/2, 1], box([dhwidth, (wallhheight-dhheight)/2, 1], wallmat)));
+      translate([dhwidth*2+wallhwidth, 0, 1], box([wallhwidth, wallhheight, 1], wallmat)),
+      translate([-dhwidth*2-wallhwidth, 0, 1], box([wallhwidth, wallhheight, 1], wallmat))),
+    translate([0, wallhheight-(wallhheight-dhheight)/2, 1], box([dhwidth*2, (wallhheight-dhheight)/2, 1], wallmat)));
   var floor = translate([0, -dhheight - 1, 0], box([100, 1, 100], ["/","/","/"]));
-  var scene = union(union(wall, door), floor);
-  var view = translate([vw/2, vh/2, -100], rotx(0.2, scene));
+  var scene = union(union(wall, doors), floor);
+  var view = translate([vw/2, vh/2, -100], rotx(0.2, roty(-0.6, scene)));
 
   var pos = -Math.PI/2;
   var dpos = 0;
@@ -92,7 +107,7 @@
     for (var y = vh - 1; y >= 0; y--) {
       for (var x = 0; x < vw; x++) {
         var z = 0, res;
-        while ((res = view(x,y,z)) > 0.11) {
+        while ((res = view(x,y,z)) > 0.2) {
           z -= res;
           if (!isFinite(z) || z < -1000) {
             mat = " ";
