@@ -2,9 +2,6 @@
 <pre style="font-family: 'Monaco', monospace; font-size: 0.7em; line-height: 0.7em;">
 </pre>
 <script>
-  function vabs(a,b) { return [Math.abs(a[0]),Math.abs(a[1]),Math.abs(a[2])]; }
-  function vadd(a,b) { return [a[0]+b[0],a[1]+b[1],a[2]+b[2]]; }
-  function vsub(a,b) { return [a[0]-b[0],a[1]-b[1],a[2]-b[2]]; }
   function box(size,ms) {
     return function (x, y, z) {
       var vdist0 = Math.abs(x) - size[0];
@@ -22,7 +19,7 @@
     var dx = vec[0];
     var dy = vec[1];
     var dz = vec[2];
-    return function (x, y, z) { return obj(x - dx, y - dy, z - dz); }
+    return function (x, y, z) { return obj(x - dx, y - dy, z - dz); };
   }
   function spin(obj) {
     return function (x, y, z) {
