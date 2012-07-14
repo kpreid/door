@@ -1,0 +1,71 @@
+<title>Door</title>
+<pre style="font-family: 'Monaco', monospace; font-size: 0.7em; line-height: 0.7em;">
+</pre>
+<script>
+  function vabs(a,b) { return [Math.abs(a[0]),Math.abs(a[1]),Math.abs(a[2])]; }
+  function vadd(a,b) { return [a[0]+b[0],a[1]+b[1],a[2]+b[2]]; }
+  function vsub(a,b) { return [a[0]-b[0],a[1]-b[1],a[2]-b[2]]; }
+  function box(v,size,ms) {
+    var vdist = vsub(vabs(v), size);
+    
+    return {
+      d: Math.max(vdist[0], vdist[1], vdist[2]),
+      m: vdist[0] > vdist[1] && vdist[0] > vdist[2] ? ms[0] :
+         vdist[1] > vdist[0] && vdist[1] > vdist[2] ? ms[1] :
+         ms[2]
+    }
+  }
+  function vrotx(v, a) {
+    return [
+    v[0],
+    v[1] * Math.cos(a) + v[2] * -Math.sin(a),
+    v[1] * Math.sin(a) + v[2] * Math.cos(a)
+    ]
+  }
+  function vroty(v, a) {
+    return [v[0] * Math.cos(a) + v[2] * Math.sin(a),
+    v[1],
+    v[0] * -Math.sin(a) + v[2] * Math.cos(a)
+    ]
+  }
+  function vrotz(v, a) {
+    return [v[0] * Math.cos(a) + v[1] * Math.sin(a),
+    v[0] * -Math.sin(a) + v[1] * Math.cos(a),
+    v[2]
+    ]
+  }
+  function union(a, b) {
+    return a.d > b.d ? b : a;
+  }
+  function scene(v) {
+    var door = box(vsub(vroty(vsub(v, [0, 10, 0]), Date.now() / 300), [0, 0, 10]), [1, 20, 10], [":", "\u2014", "|"]);
+    var floor = box(vsub(v, [0, -10, 0]), [100, 1, 100], ["/","/","/"]);
+    
+    return union(door, floor);
+  }
+  var vw = 80, vh = 80;
+  function view(v) {
+    return scene(vrotx(vadd(v, [-vw/2, -vh/2, 100]), -0.2));
+  }
+  var distant = { d: 0, m: " " };
+  function r() {
+    var t = "";
+    for (var y = vh - 1; y >= 0; y--) {
+      for (var x = 0; x < vw; x++) {
+        var z = 0, res;
+        while ((res = view([x,y,z])).d > 1e-3) {
+          z -= res.d;
+          if (!isFinite(z) || z < -1000) {
+            res = distant;
+            break;
+          }
+        }
+        //t += z;
+        t += res.m;
+      }
+      t += "\n";
+    }
+    document.getElementsByTagName("pre")[0].textContent=t;
+  }
+  setInterval(r, 1000/30);
+</script>
