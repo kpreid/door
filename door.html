@@ -5,15 +5,18 @@
   function vabs(a,b) { return [Math.abs(a[0]),Math.abs(a[1]),Math.abs(a[2])]; }
   function vadd(a,b) { return [a[0]+b[0],a[1]+b[1],a[2]+b[2]]; }
   function vsub(a,b) { return [a[0]-b[0],a[1]-b[1],a[2]-b[2]]; }
-  function box(v,size,ms) {
-    var vdist = vsub(vabs(v), size);
-    
-    return {
-      d: Math.max(vdist[0], vdist[1], vdist[2]),
-      m: vdist[0] > vdist[1] && vdist[0] > vdist[2] ? ms[0] :
-         vdist[1] > vdist[0] && vdist[1] > vdist[2] ? ms[1] :
-         ms[2]
-    }
+  function box(size,ms) {
+    return function (v) {
+      var vdist0 = Math.abs(v[0]) - size[0];
+      var vdist1 = Math.abs(v[1]) - size[1];
+      var vdist2 = Math.abs(v[2]) - size[2];
+      return {
+        d: Math.max(vdist0, vdist1, vdist2),
+        m: vdist0 > vdist1 && vdist0 > vdist2 ? ms[0] :
+           vdist1 > vdist0 && vdist1 > vdist2 ? ms[1] :
+           ms[2]
+      };
+    };
   }
   function vrotx(v, a) {
     return [
@@ -37,11 +40,10 @@
   function union(a, b) {
     return a.d > b.d ? b : a;
   }
+  var door = box([1, 20, 10], [":", "\u2014", "|"]);
+  var floor = box([100, 1, 100], ["/","/","/"]);
   function scene(v) {
-    var door = box(vsub(vroty(vsub(v, [0, 10, 0]), Date.now() / 300), [0, 0, 10]), [1, 20, 10], [":", "\u2014", "|"]);
-    var floor = box(vsub(v, [0, -10, 0]), [100, 1, 100], ["/","/","/"]);
-    
-    return union(door, floor);
+    return union(door(vsub(vroty(vsub(v, [0, 10, 0]), Date.now() / 300), [0, 0, 10])), floor(vsub(v, [0, -10, 0])));
   }
   var vw = 80, vh = 80;
   function view(v) {
