@@ -1,5 +1,5 @@
 <title>Door</title>
-<pre style="font-family: 'Monaco', monospace; font-size: 0.7em; line-height: 0.7em;">
+<pre onmouseup="turn();" style="font-family: 'Monaco', monospace; font-size: 0.7em; line-height: 0.7em;">
 </pre>
 <script>
 
@@ -24,8 +24,7 @@
   }
   function spin(obj) {
     return function (x, y, z) {
-      var a = Date.now() / 300;
-      a = Math.sin(a) * Math.PI/2;
+      a = Math.sin(pos) * Math.PI/2;
       var s = Math.sin(a);
       var c = Math.cos(a);
       return obj(
@@ -60,6 +59,7 @@
   }
 
   var vw = 80, vh = 80;
+  var timestep = 1/30;
 
   var wallhwidth = 30;
   var wallhheight = 35;
@@ -76,7 +76,18 @@
   var scene = union(union(wall, door), floor);
   var view = translate([vw/2, vh/2, -100], rotx(0.2, scene));
 
+  var pos = -Math.PI/2;
+  var dpos = 0;
+  var interval;
+  
   function r() {
+    pos += dpos * timestep;
+    if (Math.abs(pos) >= Math.PI/2) {
+      dpos = 0;
+      pos = Math.PI/2 * pos / Math.abs(pos);
+      clearInterval(interval); interval = undefined;
+    }
+    
     var t = [];
     for (var y = vh - 1; y >= 0; y--) {
       for (var x = 0; x < vw; x++) {
@@ -94,5 +105,17 @@
     }
     document.getElementsByTagName("pre")[0].textContent = t.join("");
   }
-  setInterval(r, 1000/30);
+  
+  function turn() {
+    if (dpos !== 0) {
+      dpos *= -1;
+    } else {
+      dpos = (pos < 0 ? 1 : -1) * 2.3;
+    }
+    if (!interval) {
+      interval = setInterval(r, timestep*1000);
+    }
+  }
+  
+  r();
 </script>
