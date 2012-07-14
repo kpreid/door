@@ -2,17 +2,18 @@
 <pre style="font-family: 'Monaco', monospace; font-size: 0.7em; line-height: 0.7em;">
 </pre>
 <script>
+
+  var mat;
+
   function box(size,ms) {
     return function (x, y, z) {
       var vdist0 = Math.abs(x) - size[0];
       var vdist1 = Math.abs(y) - size[1];
       var vdist2 = Math.abs(z) - size[2];
-      return {
-        d: Math.max(vdist0, vdist1, vdist2),
-        m: vdist0 > vdist1 && vdist0 > vdist2 ? ms[0] :
-           vdist1 > vdist0 && vdist1 > vdist2 ? ms[1] :
-           ms[2]
-      };
+      mat = vdist0 > vdist1 && vdist0 > vdist2 ? ms[0] :
+            vdist1 > vdist0 && vdist1 > vdist2 ? ms[1] :
+            ms[2];
+      return Math.max(vdist0, vdist1, vdist2);
     };
   }
   function translate(vec, obj) {
@@ -46,9 +47,14 @@
   }
   function union(as, bs) {
     return function (x, y, z) {
-      var a = as(x, y, z);
+      var a = as(x, y, z); var am = mat;
       var b = bs(x, y, z);
-      return a.d > b.d ? b : a;
+      if (a < b) {
+        mat = am;
+        return a;
+      } else {
+        return b;
+      }
     };
   }
 
@@ -59,21 +65,20 @@
   var scene = union(door, floor);
   var view = translate([vw/2, vh/2, -100], rotx(0.2, scene));
 
-  var distant = { d: 0, m: " " };
   function r() {
     var t = "";
     for (var y = vh - 1; y >= 0; y--) {
       for (var x = 0; x < vw; x++) {
         var z = 0, res;
-        while ((res = view(x,y,z)).d > 1e-3) {
-          z -= res.d;
+        while ((res = view(x,y,z)) > 0.5) {
+          z -= res;
           if (!isFinite(z) || z < -1000) {
-            res = distant;
+            mat = " ";
             break;
           }
         }
         //t += z;
-        t += res.m;
+        t += mat;
       }
       t += "\n";
     }
