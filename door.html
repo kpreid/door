@@ -66,7 +66,7 @@
   var view = translate([vw/2, vh/2, -100], rotx(0.2, scene));
 
   function r() {
-    var t = "";
+    var t = [];
     for (var y = vh - 1; y >= 0; y--) {
       for (var x = 0; x < vw; x++) {
         var z = 0, res;
@@ -77,12 +77,11 @@
             break;
           }
         }
-        //t += z;
-        t += mat;
+        t.push(mat);
       }
-      t += "\n";
+      t.push("\n");
     }
-    document.getElementsByTagName("pre")[0].textContent=t;
+    document.getElementsByTagName("pre")[0].textContent = t.join("");
   }
   setInterval(r, 1000/30);
 </script>
