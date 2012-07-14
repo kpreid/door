@@ -28,6 +28,18 @@
   }
   function spin(obj) {
     return function (x, y, z) {
+      var a = Date.now() / 1000;
+      var s = Math.sin(a);
+      var c = Math.cos(a);
+      return obj(
+        x * c + z * s,
+        y,
+        x * -s + z * c
+      );
+    };
+  }
+  function doorturn(obj) {
+    return function (x, y, z) {
       var a = pos;
       var s = Math.sin(a);
       var c = Math.cos(a);
@@ -82,15 +94,17 @@
   var dhwidth = 10;
   var dhheight = 20;
   var hthick = 2;
-  var door = translate([-dhwidth*2, 0, 0], spin(translate([hthick, 0, dhwidth], box([hthick, dhheight, dhwidth], [".", "\u2014", "|"]))));
+  var door = translate([-dhwidth*2, 0, 0], doorturn(translate([hthick, 0, dhwidth], box([hthick, dhheight, dhwidth], [".", "\u2014", "|"]))));
   var doors = union(door, mirror(door));
   var wall = union(
     union(
       translate([dhwidth*2+wallhwidth, 0, -hthick], box([wallhwidth, wallhheight, hthick], wallmat)),
       translate([-dhwidth*2-wallhwidth, 0, -hthick], box([wallhwidth, wallhheight, hthick], wallmat))),
     translate([0, wallhheight-(wallhheight-dhheight)/2, -hthick], box([dhwidth*2, (wallhheight-dhheight)/2, hthick], wallmat)));
-  var floor = translate([0, -dhheight - 1, 0], box([100, 1, 100], ["/","/","/"]));
-  var scene = union(union(wall, doors), floor);
+  var floor = translate([0, -dhheight - 1.1, 0], box([100, 1, 100], ["/","/","/"]));
+  var sill = translate([0, -dhheight - 1, -hthick], box([dhwidth*2, 1, hthick], ["\\","%","\\"]));
+  var sbox = translate([0, 0, -12], spin(box([8, 8, 8], ["x", "y", "z"])))
+  var scene = union(sbox, union(union(wall, doors), union(floor, sill)));
   var view = translate([vw/2, vh/2, -100], rotx(0.2, roty(-0.6, scene)));
 
   var pos = -Math.PI/2;
@@ -102,7 +116,9 @@
     if (Math.abs(pos) >= Math.PI/2) {
       dpos = 0;
       pos = Math.PI/2 * pos / Math.abs(pos);
-      clearInterval(interval); interval = undefined;
+      if (pos < 0) { // no animation needed
+        clearInterval(interval); interval = undefined;
+      }
     }
     
     var t = [];
