@@ -36,44 +36,39 @@
       );
     };
   }
-  function vrotx(v, a) {
-    return [
-    v[0],
-    v[1] * Math.cos(a) + v[2] * -Math.sin(a),
-    v[1] * Math.sin(a) + v[2] * Math.cos(a)
-    ]
+  function rotx(a, obj) {
+    return function (x, y, z) {
+      var s = Math.sin(a);
+      var c = Math.cos(a);
+      return obj(
+        x,
+        y * c + z * s,
+        y * -s + z * c
+      );
+    };
   }
-  function vroty(v, a) {
-    return [v[0] * Math.cos(a) + v[2] * Math.sin(a),
-    v[1],
-    v[0] * -Math.sin(a) + v[2] * Math.cos(a)
-    ]
+  function union(as, bs) {
+    return function (x, y, z) {
+      var a = as(x, y, z);
+      var b = bs(x, y, z);
+      return a.d > b.d ? b : a;
+    };
   }
-  function vrotz(v, a) {
-    return [v[0] * Math.cos(a) + v[1] * Math.sin(a),
-    v[0] * -Math.sin(a) + v[1] * Math.cos(a),
-    v[2]
-    ]
-  }
-  function union(a, b) {
-    return a.d > b.d ? b : a;
-  }
+
+  var vw = 80, vh = 80;
+
   var door = translate([0, 10, 0], spin(translate([0, 0, 10], box([1, 20, 10], [":", "\u2014", "|"]))));
   var floor = translate([0, -10, 0], box([100, 1, 100], ["/","/","/"]));
-  function scene(v) {
-    return union(door(v[0], v[1], v[2]), floor(v[0],v[1],v[2]));
-  }
-  var vw = 80, vh = 80;
-  function view(v) {
-    return scene(vrotx(vadd(v, [-vw/2, -vh/2, 100]), -0.2));
-  }
+  var scene = union(door, floor);
+  var view = rotx(0.2, translate([vw/2, vh/2, -100], scene));
+
   var distant = { d: 0, m: " " };
   function r() {
     var t = "";
     for (var y = vh - 1; y >= 0; y--) {
       for (var x = 0; x < vw; x++) {
         var z = 0, res;
-        while ((res = view([x,y,z])).d > 1e-3) {
+        while ((res = view(x,y,z)).d > 1e-3) {
           z -= res.d;
           if (!isFinite(z) || z < -1000) {
             res = distant;
