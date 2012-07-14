@@ -25,6 +25,7 @@
   function spin(obj) {
     return function (x, y, z) {
       var a = Date.now() / 300;
+      a = Math.sin(a) * Math.PI/2;
       var s = Math.sin(a);
       var c = Math.cos(a);
       return obj(
@@ -60,9 +61,18 @@
 
   var vw = 80, vh = 80;
 
-  var door = translate([0, 10, 0], spin(translate([0, 0, 10], box([1, 20, 10], [":", "\u2014", "|"]))));
-  var floor = translate([0, -10, 0], box([100, 1, 100], ["/","/","/"]));
-  var scene = union(door, floor);
+  var wallhwidth = 30;
+  var wallhheight = 35;
+  var dhwidth = 10;
+  var dhheight = 20;
+  var door = translate([-dhwidth, 0, 0], spin(translate([1, 0, dhwidth], box([1, dhheight, dhwidth], [":", "\u2014", "|"]))));
+  var wall = union(
+    union(
+      translate([dhwidth+wallhwidth, 0, 1], box([wallhwidth, wallhheight, 1], [".", "-", "."])),
+      translate([-dhwidth-wallhwidth, 0, 1], box([wallhwidth, wallhheight, 1], [".", "-", "."]))),
+    translate([0, wallhheight-(wallhheight-dhheight)/2, 1], box([dhwidth, (wallhheight-dhheight)/2, 1], [".", "-", "."])));
+  var floor = translate([0, -dhheight - 1, 0], box([100, 1, 100], ["/","/","/"]));
+  var scene = union(union(wall, door), floor);
   var view = translate([vw/2, vh/2, -100], rotx(0.2, scene));
 
   function r() {
@@ -70,7 +80,7 @@
     for (var y = vh - 1; y >= 0; y--) {
       for (var x = 0; x < vw; x++) {
         var z = 0, res;
-        while ((res = view(x,y,z)) > 0.5) {
+        while ((res = view(x,y,z)) > 0.11) {
           z -= res;
           if (!isFinite(z) || z < -1000) {
             mat = " ";
