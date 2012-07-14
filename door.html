@@ -60,7 +60,7 @@
   var door = translate([0, 10, 0], spin(translate([0, 0, 10], box([1, 20, 10], [":", "\u2014", "|"]))));
   var floor = translate([0, -10, 0], box([100, 1, 100], ["/","/","/"]));
   var scene = union(door, floor);
-  var view = rotx(0.2, translate([vw/2, vh/2, -100], scene));
+  var view = translate([vw/2, vh/2, -100], rotx(0.2, scene));
 
   var distant = { d: 0, m: " " };
   function r() {
