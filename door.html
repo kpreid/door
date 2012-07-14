@@ -63,14 +63,15 @@
 
   var wallhwidth = 30;
   var wallhheight = 35;
+  var wallmat = [".", "\u2014", ":"];
   var dhwidth = 10;
   var dhheight = 20;
-  var door = translate([-dhwidth, 0, 0], spin(translate([1, 0, dhwidth], box([1, dhheight, dhwidth], [":", "\u2014", "|"]))));
+  var door = translate([-dhwidth, 0, 0], spin(translate([1, 0, dhwidth], box([1, dhheight, dhwidth], [".", "\u2014", "|"]))));
   var wall = union(
     union(
-      translate([dhwidth+wallhwidth, 0, 1], box([wallhwidth, wallhheight, 1], [".", "-", "."])),
-      translate([-dhwidth-wallhwidth, 0, 1], box([wallhwidth, wallhheight, 1], [".", "-", "."]))),
-    translate([0, wallhheight-(wallhheight-dhheight)/2, 1], box([dhwidth, (wallhheight-dhheight)/2, 1], [".", "-", "."])));
+      translate([dhwidth+wallhwidth, 0, 1], box([wallhwidth, wallhheight, 1], wallmat)),
+      translate([-dhwidth-wallhwidth, 0, 1], box([wallhwidth, wallhheight, 1], wallmat))),
+    translate([0, wallhheight-(wallhheight-dhheight)/2, 1], box([dhwidth, (wallhheight-dhheight)/2, 1], wallmat)));
   var floor = translate([0, -dhheight - 1, 0], box([100, 1, 100], ["/","/","/"]));
   var scene = union(union(wall, door), floor);
   var view = translate([vw/2, vh/2, -100], rotx(0.2, scene));
