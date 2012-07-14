@@ -1,11 +1,13 @@
 <title>Door</title>
-<pre onmouseup="turn();" style="display: table; margin: auto; font-family: 'Monaco', monospace; font-size: 0.7em; line-height: 0.7em;">
+<pre onmouseup="turn();" style="display: table; margin: auto; font-family: 'Monaco', monospace; font-size: 0.6em; line-height: 0.7em;">
 </pre>
 <p>Click doors to open or close.</p>
 <script>
-
+  
+  // Appearance of hit surface - global used to avoid allocating a record to return
   var mat;
-
+  
+  // Scene construction tools
   function box(size,ms) {
     return function (x, y, z) {
       var vdist0 = Math.abs(x) - size[0];
@@ -84,10 +86,12 @@
       }
     };
   }
-
+  
+  // Display parameters
   var vw = 80, vh = 80;
   var timestep = 1/30;
-
+  
+  // Scene
   var wallhwidth = 30;
   var wallhheight = 35;
   var wallmat = [";", "\u2014", ":"];
@@ -106,12 +110,15 @@
   var sbox = translate([0, 0, -12], spin(box([8, 8, 8], ["x", "y", "z"])))
   var scene = union(sbox, union(union(wall, doors), union(floor, sill)));
   var view = translate([vw/2, vh/2, -100], rotx(0.2, roty(-0.6, scene)));
-
+  
+  // Animation state
   var pos = -Math.PI/2;
   var dpos = 0;
   var interval;
   
+  // Main loop function
   function r() {
+    // Update state
     pos += dpos * timestep;
     if (Math.abs(pos) >= Math.PI/2) {
       dpos = 0;
@@ -121,12 +128,13 @@
       }
     }
     
+    // Render scene
     var t = [];
     for (var y = vh - 1; y >= 0; y--) {
       for (var x = 0; x < vw; x++) {
-        var z = 0, res;
-        while ((res = view(x,y,z)) > 0.12) {
-          z -= res;
+        var z = 0, distance;
+        while ((distance = view(x,y,z)) > 0.12) {
+          z -= distance;
           if (!isFinite(z) || z < -1000) {
             mat = " ";
             break;
@@ -139,6 +147,7 @@
     document.getElementsByTagName("pre")[0].textContent = t.join("");
   }
   
+  // Click handler
   function turn() {
     if (dpos !== 0) {
       dpos *= -1;
@@ -150,5 +159,6 @@
     }
   }
   
+  // Render initial state
   r();
 </script>
